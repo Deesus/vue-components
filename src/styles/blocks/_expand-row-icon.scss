@@ -1,0 +1,11 @@
+@import "../base/constants";
+
+
+.expand-row-icon {
+    cursor: pointer;
+    transition: 250ms transform ease-in-out;
+
+    &--expanded {
+        transform: rotate(90deg);
+    }
+}

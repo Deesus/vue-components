@@ -1,0 +1,12 @@
+@import "./base/constants";
+@import "./base/_resets";
+
+
+// ==================================================
+// app overrides:
+// ==================================================
+
+// override eva-icons' container height:
+.eva-hover {
+    height: 24px;
+}

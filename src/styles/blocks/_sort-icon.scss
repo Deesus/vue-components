@@ -1,0 +1,20 @@
+@import "../base/constants";
+
+
+.sort-icon {
+    opacity: 0;
+    transition: 250ms opacity ease-in-out, 300ms transform ease-in-out;
+
+    &:hover {
+        opacity: 0.3;
+    }
+
+    &--ascending {
+        opacity: 1;
+    }
+
+    &--descending {
+        opacity: 1;
+        transform: rotate(180deg);
+    }
+}
