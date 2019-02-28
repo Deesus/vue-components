@@ -3,13 +3,13 @@
 // ==================================================
 $font-family-default: 'Open Sans', sans-serif;
 
-$font-size-default: 1.6rem;
+$font-size-default: 16px;
 $line-height-default: 1.5;
 
 $font-color-white: #ededed;
-$font-color-default: rgb(120,120,120);
+$font-color-default: rgb(82, 82, 82);
 $font-color-bold: #353535;
-$font-color-muted: #b6b6b6;
+$font-color-muted: rgb(120, 120, 120);
 
 $font-weight-normal: 400;
 $font-weight-bold: 600;
@@ -19,6 +19,7 @@ $font-weight-bold: 600;
 // table
 // ==================================================
 $table-row-height: 48px;
+$table-header-bg-color: #f9f8fe;
 $table-border-color: #dcdcdc;
 $table-border: 1px solid $table-border-color;
 $table-border-hover-color: #8a9cc1;
@@ -26,6 +27,7 @@ $table-border-hover: 1px solid $table-border-hover-color;
 $table-padding-vertical: 8px;
 $table-padding-horizontal: 12px;
 $table-padding: $table-padding-vertical $table-padding-horizontal;
+
 
 // ==================================================
 // misc

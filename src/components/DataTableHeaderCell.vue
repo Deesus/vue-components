@@ -1,13 +1,12 @@
 <template>
     <th class="data-table-header-cell">
 
-        <span :class="tableHeaderLabelCssClasses" @click="tableHeaderClick">
+        <span :class="tableHeaderLabelCssClasses" @click.stop="tableHeaderClick">
             <span>{{ columnName }}</span>
             <eva-icon class="sort-icon"
                       fill="#353535"
                       v-if="isSortable"
-                      name="arrow-upward-outline"
-                      @click="tableHeaderClick"/>
+                      name="arrow-upward-outline" />
         </span>
 
     </th>
@@ -16,7 +15,7 @@
 
 <script>
     import { EvaIcon } from 'vue-eva-icons';
-    import { FIREBASE } from '../app.constants';
+    import * as CONST from '../app.constants';
 
 
     export default {
@@ -57,13 +56,13 @@
                     'table-header-label--sort-ascending': (this.lastColumnSorted !== undefined) &&
                                                           (
                                                             (this.lastColumnSorted.columnName === this.columnName) &&
-                                                            (this.lastColumnSorted.direction === FIREBASE.SORT_ASCENDING)
+                                                            (this.lastColumnSorted.direction === CONST.DATA_TABLE.SORT_ASCENDING)
                                                           ),
 
                     'table-header-label--sort-descending': (this.lastColumnSorted !== undefined) &&
                                                            (
                                                              (this.lastColumnSorted.columnName === this.columnName) &&
-                                                             (this.lastColumnSorted.direction === FIREBASE.SORT_DESCENDING)
+                                                             (this.lastColumnSorted.direction === CONST.DATA_TABLE.SORT_DESCENDING)
                                                            )
                 }
             }
@@ -81,9 +80,9 @@
     .data-table-header-cell {
         @include tableCellGeometry();
 
+        color: $font-color-bold;
         font-weight: $font-weight-bold;
         text-align: left;
-        color: $font-color-bold;
     }
 
     .table-header-label {
@@ -110,7 +109,6 @@
         }
 
         &--sort-descending {
-
             .sort-icon,
             &:hover .sort-icon {
                 opacity: 1;

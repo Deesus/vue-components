@@ -5,12 +5,46 @@
     padding: $table-padding;
     min-height: $table-row-height;
     height: $table-row-height;
+    border-top: $table-border;
 
     &:first-child {
         padding-left: 16px;
+        border-left: $table-border;
     }
 
     &:last-child {
         padding-right: 16px;
+        border-right: $table-border;
+    }
+}
+
+@mixin tableInputCellGeometry() {
+    min-height: $table-row-height;
+    height: $table-row-height;
+
+    & > * {
+        padding: $table-padding;
+    }
+
+    &:first-child {
+        & > * {
+            padding-left: 16px;
+        }
+    }
+
+    &:last-child {
+        & > * {
+            padding-right: 16px;
+        }
+    }
+}
+
+@mixin appButtonColor($color) {
+    color: $color;
+    border: 1px solid $color;
+    transition: 150ms background-color ease-in-out;
+
+    &:hover {
+        background-color: lighten($color, 28%);
     }
 }

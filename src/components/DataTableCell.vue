@@ -9,6 +9,7 @@
     export default {
         name: 'DataTableCell',
 
+
         props: {
             id: {
                 required: false
@@ -33,7 +34,6 @@
         @include tableCellGeometry();
 
         border-top: $table-border;
-        transition: 250ms background-color ease-in-out;
         vertical-align: top;
     }
 </style>

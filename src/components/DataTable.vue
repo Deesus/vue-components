@@ -1,119 +1,162 @@
 <template>
+        <table class="data-table">
 
-    <div class="data-table">
-        <table>
             <thead>
-            <tr class="data-table__header-row">
-                <data-table-header-cell :is-sortable="false" />
+                <tr class="data-table__header-row">
+                    <!-- sort icon's column header should be empty: -->
+                    <data-table-header-cell :is-sortable="false" />
 
-                <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.NAME"
-                                        :is-sortable="true"
-                                        :last-column-sorted="lastColumnSorted"
-                                        @eventTableHeaderClick="handleSortByColumnClick"
-                />
-                <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.DESCRIPTION"
-                                        :is-sortable="false"
-                                        :last-column-sorted="lastColumnSorted"
-                />
-                <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.AMOUNT"
-                                        :is-sortable="true"
-                                        :last-column-sorted="lastColumnSorted"
-                                        @eventTableHeaderClick="handleSortByColumnClick"
-                />
-                <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.DATE"
-                                        :is-sortable="true"
-                                        :last-column-sorted="lastColumnSorted"
-                                        @eventTableHeaderClick="handleSortByColumnClick"
-                />
-            </tr>
+
+                    <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.NAME"
+                                            :is-sortable="true"
+                                            :last-column-sorted="lastColumnSorted"
+                                            @eventTableHeaderClick="handleSortByColumnClick"
+                    />
+                    <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.DESCRIPTION"
+                                            :is-sortable="false"
+                                            :last-column-sorted="lastColumnSorted"
+                    />
+                    <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.AMOUNT"
+                                            :is-sortable="true"
+                                            :last-column-sorted="lastColumnSorted"
+                                            @eventTableHeaderClick="handleSortByColumnClick"
+                    />
+                    <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.DATE"
+                                            :is-sortable="true"
+                                            :last-column-sorted="lastColumnSorted"
+                                            @eventTableHeaderClick="handleSortByColumnClick"
+                    />
+                </tr>
             </thead>
 
+
             <tbody>
-                <data-table-row v-for="entry in $store.state.data" :key="entry.ID" :entry="entry" />
+                <data-table-row v-for="entry in getSortedTableList(sortByColumn, sortDirection)" :key="entry.ID" :entry="entry" />
             </tbody>
+
+
+            <data-table-footer />
+
         </table>
-
-        <div class="data-table__footer"></div>
-    </div>
-
 </template>
 
 
 <script>
     import * as CONST from '../app.constants';
-    import * as ACTION from '../store/types.actions';
     import { EvaIcon } from 'vue-eva-icons';
     import DataTableRow from './DataTableRow.vue';
     import DataTableHeaderCell from './DataTableHeaderCell.vue';
+    import DataTableFooter from './DataTableFooter.vue';
+    import { mapGetters, mapActions } from 'vuex';
 
 
     export default {
         name: 'DataTable',
 
+
         components: {
             DataTableRow,
             DataTableHeaderCell,
+            DataTableFooter,
             [EvaIcon.name]: EvaIcon
         },
+
 
         data() {
             return {
                 errored: false,
                 loading: true,
                 lastColumnSortedName: '',
-                lastColumnSortedDirection: CONST.FIREBASE.SORT_ASCENDING,
-                DATA_TABLE_COLUMNS: CONST.DATA_TABLE_COLUMNS
+                sortDirection: CONST.DATA_TABLE.SORT_NONE,
+                sortByColumn: '',
+                DATA_TABLE_COLUMNS: CONST.DATA_TABLE.COLUMNS,
             };
         },
 
+
         methods: {
+            ...mapActions([
+                'getInitialData',
+                'instantiateFirebase',
+                'updateEntryByKey'
+            ]),
+
             handleSortByColumnClick(columnName) {
+
                 // if clicked column is same as previously clicked column, then toggle sort direction:
                 if (this.lastColumnSortedName === columnName) {
-                    this.lastColumnSortedDirection = this.lastColumnSortedDirection === CONST.FIREBASE.SORT_ASCENDING ?
-                                                     CONST.FIREBASE.SORT_DESCENDING : CONST.FIREBASE.SORT_ASCENDING;
+                    this.sortDirection = this.toggleSortArrowDirection();
                 }
-                // if the clicked column is different than previous one, always ensure it is ascending:
+                // if the clicked column is different than previous one, always ensure it is initially sorted ascending:
                 else {
-                    this.lastColumnSortedDirection = CONST.FIREBASE.SORT_ASCENDING;
+                    this.sortDirection = CONST.DATA_TABLE.SORT_ASCENDING;
                 }
 
-                // after asc/desc sort direction is determined, sort the column:
-                if (this.lastColumnSortedDirection === CONST.FIREBASE.SORT_DESCENDING) {
-                    this.$store.dispatch(ACTION.SORT_BY_COLUMN, { columnName: columnName, direction: CONST.FIREBASE.SORT_DESCENDING });
+                // after asc/desc sort direction is determined, set the 'sort the column':
+                // if the sort direction is 'NONE', then don't set the `sortByColumn` either, otherwise sort by the column name:
+                if (this.sortDirection === CONST.DATA_TABLE.SORT_NONE)
+                {
+                    this.sortByColumn = '';
                 }
                 else {
-                    this.$store.dispatch(ACTION.SORT_BY_COLUMN, { columnName: columnName, direction: CONST.FIREBASE.SORT_ASCENDING });
+                    this.sortByColumn = columnName;
                 }
-
 
                 // the sorted column now becomes the 'last sorted column':
                 this.lastColumnSortedName = columnName;
             },
 
             handleTableCellDescriptionUpdated(entry) {
-                this.$store.dispatch(ACTION.UPDATE_ENTRY_BY_KEY, { key: entry.id, entryObj: {Description: entry.content} });
+                this.updateEntryByKey({ key: entry.id, entryObj: { Description: entry.content } });
+            },
+
+            toggleSortArrowDirection() {
+                let newArrowDirection;
+
+                switch (this.sortDirection) {
+
+                    case CONST.DATA_TABLE.SORT_NONE:
+                        newArrowDirection = CONST.DATA_TABLE.SORT_ASCENDING;
+                        break;
+
+                    case CONST.DATA_TABLE.SORT_ASCENDING:
+                        newArrowDirection = CONST.DATA_TABLE.SORT_DESCENDING;
+                        break;
+
+                    case CONST.DATA_TABLE.SORT_DESCENDING:
+                        newArrowDirection = CONST.DATA_TABLE.SORT_NONE;
+                        break;
+
+                    default:
+                        newArrowDirection = CONST.DATA_TABLE.SORT_ASCENDING;
+                        break;
+                }
+
+                return newArrowDirection;
             }
         },
 
+
         computed: {
+            ...mapGetters([
+                'getSortedTableList'
+            ]),
+
             lastColumnSorted() {
                 return {
                     columnName: this.lastColumnSortedName,
-                    direction:  this.lastColumnSortedDirection
+                    direction:  this.sortDirection
                 };
             }
         },
 
+
         created() {
             // ---------- get data: ----------
-            this.$store
-                // establish Firebase connection:
-                .dispatch(ACTION.INSTANTIATE_FIREBASE)
-
-                // get initial data:
-                .then( () => {
-                    this.$store.dispatch(ACTION.GET_INITIAL_DATA);
+            // establish Firebase connection then get initial data:
+            this.instantiateFirebase()
+                .then(() => {
+                    this.getInitialData();
                 });
         }
     }
@@ -127,24 +170,15 @@
     .data-table {
         max-width: 1200px;
         width: 100%;
-
-        table {
-            border-collapse: collapse;
-            border-spacing: 0;
-            border: 0;
-        }
+        border-collapse: collapse;
+        border-spacing: 0;
+        border: 0;
+        margin-left: auto;
+        margin-right: auto;
 
         // TODO: possibly need a separate component for 'header-row' and 'table-body-row'?
         &__header-row {
-            background-color: #f9f8fe;
-        }
-
-        &__data-row {
-            &:hover td {
-                border-top: $table-border-hover;
-                border-bottom: $table-border-hover;
-                background-color: #e7ecff;
-            }
+            background-color: $table-header-bg-color;
         }
     }
 </style>

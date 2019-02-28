@@ -1,9 +1,10 @@
+// We have both named exports and default exports in order to properly mock Vuex for unit testing. See Vuex docs.
+
 import Vue from 'vue';
 import Vuex from 'vuex';
 
 import Firebase from 'firebase/app';
 import 'firebase/database';
-import SECRETS_FIREBASE from '../../env.SECRETS';
 import * as CONST from "../app.constants";
 import * as ACTION from './types.actions';
 import * as MUTATION from './types.mutations';
@@ -13,15 +14,74 @@ Vue.use(Vuex);
 
 
 export const state = {
-    limitResultsTo: CONST.FIREBASE.LIMIT_RESULTS_TO_DEFAULT_NUMBER,
-    fbInstance: null,
-    data: null
+    fbInstance: null,       // Firebase instance
+    data:       [],         // database list of payments
+    errored:    false,
+    loading:    true
 };
 
 
 export const getters = {
-    getFirebaseInstance(state) {
-        return state.fbInstance;
+    getSortedTableList(state) {
+        return (sortByColumn, sortDirection) => {
+            let tableList = [...state.data];
+
+            // ----- sort the data by column name: -----
+            switch (sortByColumn) {
+
+                case CONST.DATA_TABLE.COLUMNS.NAME:
+                    tableList = tableList
+                                .sort( (x, y) => {
+                                    const name1 = x[CONST.DATA_TABLE.COLUMNS.NAME].toUpperCase();
+                                    const name2 = y[CONST.DATA_TABLE.COLUMNS.NAME].toUpperCase();
+
+                                    if (name1 < name2) {
+                                        return -1;
+                                    }
+                                    else {
+                                        return 1;
+                                    }
+                                });
+                    break;
+
+                case CONST.DATA_TABLE.COLUMNS.AMOUNT:
+                    tableList = tableList
+                                .sort((x, y) => {
+                                    const amount1 = parseFloat(x[CONST.DATA_TABLE.COLUMNS.AMOUNT]);
+                                    const amount2 = parseFloat(y[CONST.DATA_TABLE.COLUMNS.AMOUNT]);
+
+                                    return amount1 - amount2;
+                                });
+                    break;
+
+                case CONST.DATA_TABLE.COLUMNS.DATE:
+                    // because the date values are stored in ISO format, we can do a simple string sort:
+                    tableList = tableList
+                                .sort( (x, y) => {
+                                    const date1 = x[CONST.DATA_TABLE.COLUMNS.DATE].toUpperCase();
+                                    const date2 = y[CONST.DATA_TABLE.COLUMNS.DATE].toUpperCase();
+
+                                    if (date1 < date2) {
+                                        return -1;
+                                    }
+                                    else {
+                                        return 1;
+                                    }
+                                });
+                    break;
+
+                default:
+                    tableList = state.data;
+                    break;
+            }
+
+            // ----- reverse the list if sorting in 'descending' direction: -----
+            if (sortDirection === CONST.DATA_TABLE.SORT_DESCENDING) {
+                tableList = tableList.reverse();
+            }
+
+            return tableList;
+        };
     }
 };
 
@@ -51,12 +111,12 @@ export const actions = {
      */
     [ACTION.INSTANTIATE_FIREBASE]({ commit }) {
         let fb = Firebase.initializeApp({
-            apiKey:             SECRETS_FIREBASE.apiKey,
-            authDomain:         SECRETS_FIREBASE.authDomain,
-            databaseURL:        SECRETS_FIREBASE.databaseURL,
-            projectId:          SECRETS_FIREBASE.projectId,
-            storageBucket:      SECRETS_FIREBASE.storageBucket,
-            messagingSenderId:  SECRETS_FIREBASE.messagingSenderId
+            apiKey:             CONST.FIREBASE.API_KEY.apiKey,
+            authDomain:         CONST.FIREBASE.API_KEY.authDomain,
+            databaseURL:        CONST.FIREBASE.API_KEY.databaseURL,
+            projectId:          CONST.FIREBASE.API_KEY.projectId,
+            storageBucket:      CONST.FIREBASE.API_KEY.storageBucket,
+            messagingSenderId:  CONST.FIREBASE.API_KEY.messagingSenderId
         }).database();
 
         commit(MUTATION.INSTANTIATE_FIREBASE, fb);
@@ -69,54 +129,23 @@ export const actions = {
      * @param state
      */
     [ACTION.GET_INITIAL_DATA]({ commit, state }) {
+        let tableList = [];
+
         state.fbInstance
             .ref(CONST.FIREBASE.REFERENCE_NODE)
-            .limitToFirst(state.limitResultsTo)
             .once('value')
             .then( (snapshot) => {
                 let tableData = snapshot.val();
-                commit(MUTATION.UPDATE_TABLE_DATA, tableData);
+
+                // map the tableData object to an array:
+                snapshot.forEach( (child) => {
+                    tableList.push(child.val());
+                });
+
+                commit(MUTATION.UPDATE_TABLE_DATA, tableList);
             })
             .catch( (error) => {
                 // TODO: gracefully handle error
-            });
-    },
-
-    /**
-     * Sorts and retrieves db entries by given column and ascending/descending option.
-     *
-     * @param commit
-     * @param state
-     * @param options {Object}: options.direction {String}: 'ASC' || 'DESC' for ascending or descending sort order.
-     *                          options.columnName {String}: Name of data-table column to sort.
-     */
-    [ACTION.SORT_BY_COLUMN]({ commit, state }, options) {
-        // set default direction:
-        if (!options.direction) {
-            options.direction = CONST.FIREBASE.SORT_ASCENDING;
-        }
-
-        let results = [];
-
-        state.fbInstance
-            .ref(CONST.FIREBASE.REFERENCE_NODE)
-            .orderByChild(options.columnName)
-            .once('value')
-            .then( (snapshot) => {
-
-                snapshot.forEach( (child) => {
-                    results.push(child.val());
-                });
-
-                if (options.direction.toUpperCase() === CONST.FIREBASE.SORT_ASCENDING) {
-                    commit(MUTATION.UPDATE_TABLE_DATA, [...results]);
-                }
-                else {
-                    commit(MUTATION.UPDATE_TABLE_DATA, [...results].reverse());
-                }
-            })
-            .catch( (error) => {
-                // TODO: gracefully handle error; early return
             });
     },
 
@@ -138,6 +167,7 @@ export const actions = {
 };
 
 
+// ---------- default exports: ----------
 export default new Vuex.Store({
     state,
     getters,

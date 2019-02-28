@@ -1,24 +1,42 @@
 <template>
     <td class="data-table-input-cell">
-        <div :class="cssClassesForTableCellContainer"
-             @blur="handleTableCellBlur($event)"
+        <div :class="cssClassesForTableCellTextarea"
              v-html="sanitizedContent"
-             :contenteditable="editable"
-        ></div>
+             ref="dataTableTextField"
+             :contenteditable="isBeingEdited">
+        </div>
+
+        <div v-if="rowExpanded" class="data-table-input-cell__controls">
+            <app-button v-if="!isBeingEdited" color="blue" @click.native.stop="handleEditButtonClick">
+                Edit
+            </app-button>
+            <app-button v-if="isBeingEdited" color="gray" @click.native.stop="handleCancelButtonClick">Cancel</app-button>
+            <app-button v-if="isBeingEdited" color="blue" @click.native.stop="handleSaveButtonClick">Save</app-button>
+        </div>
     </td>
 </template>
 
 
 <script>
+    import { EvaIcon } from 'vue-eva-icons';
+    import AppButton from './AppButton.vue';
+
+
     export default {
         name: 'DataTableCellInputCell',
+
 
         props: {
             id: {
                 required: false
             },
 
-            editable: {
+            rowExpanded: {
+                type: Boolean,
+                required: true
+            },
+
+            isBeingEdited: {
                 type: Boolean,
                 required: true
             },
@@ -29,20 +47,45 @@
             }
         },
 
+
+        components: {
+            AppButton,
+            [EvaIcon.name]: EvaIcon,
+        },
+
+
+        data() {
+            return {
+                originalContent: this.sanitizedContent
+            };
+        },
+
+
         methods: {
-            handleTableCellBlur(event) {
-                if (this.editable === true) {
+            handleSaveButtonClick(event) {
+                if (this.isBeingEdited === true) {
                     // sanitize input before it is sent to the db:
-                    const sanitizedInput = this.$sanitize(event.target.innerHTML);
+                    const sanitizedText = this.$sanitize(this.$refs.dataTableTextField.innerHTML);
 
                     // emit to parent component:
                     this.$emit('eventTableCellContentUpdated', {
                         id:      this.id,
-                        content: sanitizedInput
+                        content: sanitizedText
                     });
+
+                    this.$emit('editState', false);
                 }
+            },
+
+            handleEditButtonClick(event) {
+                this.$emit('editState', true);
+            },
+
+            handleCancelButtonClick(event) {
+                this.$emit('editState', false);
             }
         },
+
 
         computed: {
             /**
@@ -56,15 +99,15 @@
                 return this.$sanitize(this.content);
             },
 
-            cssClassesForTableCellContainer() {
+            cssClassesForTableCellTextarea() {
                 return {
-                    'data-table-input-cell__container': true,
-                    'data-table-input-cell__container--expanded': this.editable === true
-                };
+                    'data-table-input-cell__textarea': true,
+                    'data-table-input-cell__textarea--expanded': this.rowExpanded === true,
+                    'data-table-input-cell__textarea--editing': (this.isBeingEdited === true) && (this.rowExpanded === true)
+                }
             }
         }
-
-    };
+    }
 </script>
 
 
@@ -74,39 +117,30 @@
 
 
     .data-table-input-cell {
-        @include tableCellGeometry();
+        @include tableInputCellGeometry();
 
         border-top: $table-border;
-        transition: 250ms background-color ease-in-out;
         max-height: $table-row-height;
+        vertical-align: top;
 
-        &--expanded {
-            &__container {
-                word-wrap: normal;
-                overflow-wrap: normal;
+        &__textarea {
+            border-radius: 2px;
+            max-height: 34px;
+            overflow: hidden;
+
+            &--expanded {
+                max-height: none;
+            }
+
+            &--editing {
+                background-color: white;
+                max-height: none;
+                box-shadow: 0 0 0 2px inset dodgerblue;
             }
         }
 
-        &__container {
-            border: 0;
-            max-height: $table-row-height - (2 * $table-padding-vertical);
-
-            overflow: hidden;
-            line-height: 2;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            white-space: normal;
-
-            &--expanded {
-                word-wrap: normal;
-                overflow-wrap: normal;
-                max-height: none;
-
-                &:focus {
-                    outline: none;
-                    box-shadow: 0 0 0 1px inset dodgerblue;
-                }
-            }
+        &__controls {
+            text-align: right;
         }
     }
 </style>

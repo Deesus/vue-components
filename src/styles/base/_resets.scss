@@ -48,9 +48,10 @@ input,
 textarea,
 td,
 th,
+[contenteditable="true"],
 input::-moz-focus-inner,
 button::-moz-focus-inner {
-    outline: none;
+    outline: none !important;
 }
 
 h1,
@@ -84,4 +85,8 @@ input[type="radio"] {
 
 label {
     margin: 0;
+}
+
+button:not([disabled]) {
+    cursor: pointer;
 }

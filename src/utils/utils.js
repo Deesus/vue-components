@@ -11,23 +11,26 @@ export const formatDateFromISO = (DateISO) => {
 
 
 export const formatDollarAmount = (value) => {
-    // TODO: add trailing zeros for numbers:
 
-    let output;
+    // parse string as number and pad with trailing zeros, if necessary:
+    let formattedVal = parseFloat(value)
+                       .toFixed(2);
 
+
+    // add dollar symbol in appropriate location in string:
     if (value < 0) {
-        output = `-$${-value}`;
+        formattedVal = `-$${-formattedVal}`;    // n.b. we take the absolute value of a negative number before adding the `-$` prefix
     }
     else if (value > 0) {
-        output = `$${value}`;
+        formattedVal = `$${formattedVal}`;
     }
     else if (value === 0) {
-        output = `${0}`;
+        formattedVal = `${0}`;
     }
     // if our data is corrupted, and the 'Amount' value isn't a number:
     else {
-        output = 'N/A';
+        formattedVal = 'N/A';
     }
 
-    return output;
+    return formattedVal;
 };

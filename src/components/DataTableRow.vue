@@ -5,9 +5,11 @@
         </data-table-cell>
         <data-table-cell :content="entry.Name"/>
         <data-table-input-cell :id="entry.ID"
-                               :editable="isExpanded"
+                               :rowExpanded="rowExpanded"
+                               :isBeingEdited="isBeingEdited"
                                :content="entry.Description"
-                               v-on:eventTableCellContentUpdated="handleTableCellDescriptionUpdated"/>
+                               v-on:editState="handleEditStateEmitted"
+                               v-on:eventTableCellContentUpdated="handleTableCellDescriptionUpdated" />
         <data-table-cell :content="entry.Amount | formatDollarAmount"/>
         <data-table-cell :content="entry.Date | formatDateFromISO"/>
     </tr>
@@ -15,16 +17,17 @@
 
 
 <script>
-    import * as CONST from '../app.constants';
     import * as ACTION from '../store/types.actions';
     import { formatDateFromISO, formatDollarAmount } from '../utils/utils';
     import DataTableCell from './DataTableCell.vue';
     import DataTableInputCell from './DataTableInputCell.vue';
     import { EvaIcon } from 'vue-eva-icons';
+    import "../styles/app.scss";
 
 
     export default {
         name: 'DataTableRow',
+
 
         props: {
             entry: {
@@ -33,15 +36,18 @@
             }
         },
 
+
         components: {
             DataTableCell,
             DataTableInputCell,
             [EvaIcon.name]: EvaIcon
         },
 
+
         data() {
             return {
-                isExpanded: false
+                rowExpanded: false,
+                isBeingEdited: false,
             };
         },
 
@@ -52,7 +58,16 @@
             },
 
             handleExpandRowIconClick() {
-                this.isExpanded = !this.isExpanded;
+                this.rowExpanded = !this.rowExpanded;
+
+                // if row is collapsed, then it cannot be in edit state:
+                if (this.rowExpanded === false) {
+                    this.isBeingEdited = false;
+                }
+            },
+
+            handleEditStateEmitted(val) {
+                this.isBeingEdited = val;
             }
         },
 
@@ -61,7 +76,7 @@
             cssClassesForExpandRowIcon() {
                 return {
                     'expand-row-icon': true,
-                    'expand-row-icon--expanded': this.isExpanded === true
+                    'expand-row-icon--expanded': this.rowExpanded === true
                 }
             }
         },
@@ -71,6 +86,14 @@
             formatDateFromISO,
             formatDollarAmount
         },
+
+
+        mounted() {
+            this.$on('editState', (val) => {
+                console.log(val);
+                this.isBeingEdited = val;
+            });
+        }
     }
 </script>
 
@@ -84,11 +107,15 @@
         &:hover td {
             border-top: $table-border-hover;
             border-bottom: $table-border-hover;
-            background-color: #e7ecff;
-        }
+            background-color: rgba(231, 236, 255, 0.13);
 
-        &--expanded {
+            &:first-of-type {
+                border-left: $table-border-hover;
+            }
 
+            &:last-of-type {
+                border-right: $table-border-hover;
+            }
         }
     }
 </style>
