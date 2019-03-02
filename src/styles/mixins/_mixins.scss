@@ -7,12 +7,12 @@
     height: $table-row-height;
     border-top: $table-border;
 
-    &:first-child {
+    &:first-of-type {
         padding-left: 16px;
         border-left: $table-border;
     }
 
-    &:last-child {
+    &:last-of-type {
         padding-right: 16px;
         border-right: $table-border;
     }
@@ -26,13 +26,13 @@
         padding: $table-padding;
     }
 
-    &:first-child {
+    &:first-of-type {
         & > * {
             padding-left: 16px;
         }
     }
 
-    &:last-child {
+    &:last-of-type {
         & > * {
             padding-right: 16px;
         }

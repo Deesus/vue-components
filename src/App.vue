@@ -1,9 +1,8 @@
 <template>
     <div id="app">
-        <data-table></data-table>
+        <data-table :headers="headers" />
     </div>
 </template>
-
 
 
 <script>
@@ -31,7 +30,7 @@
                     {
                         name:       CONST.DATA_TABLE.COLUMNS.DESCRIPTION,
                         align:      'left',
-                        isSortable: true,
+                        isSortable: false,
                     },
                     {
                         name:       CONST.DATA_TABLE.COLUMNS.AMOUNT,

@@ -6,23 +6,10 @@
                     <!-- sort icon's column header should be empty: -->
                     <data-table-header-cell :is-sortable="false" />
 
-
-                    <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.NAME"
-                                            :is-sortable="true"
-                                            :last-column-sorted="lastColumnSorted"
-                                            @eventTableHeaderClick="handleSortByColumnClick"
-                    />
-                    <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.DESCRIPTION"
-                                            :is-sortable="false"
-                                            :last-column-sorted="lastColumnSorted"
-                    />
-                    <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.AMOUNT"
-                                            :is-sortable="true"
-                                            :last-column-sorted="lastColumnSorted"
-                                            @eventTableHeaderClick="handleSortByColumnClick"
-                    />
-                    <data-table-header-cell :column-name="DATA_TABLE_COLUMNS.DATE"
-                                            :is-sortable="true"
+                    <data-table-header-cell v-for="(header, index) in headers"
+                                            :key="index"
+                                            :column-name="header.name"
+                                            :is-sortable="header.isSortable"
                                             :last-column-sorted="lastColumnSorted"
                                             @eventTableHeaderClick="handleSortByColumnClick"
                     />
@@ -52,6 +39,17 @@
 
     export default {
         name: 'DataTable',
+
+
+        props: {
+            headers: {
+                type: Array,
+                required: true,
+                validator: (arr) => {
+                    return arr.length > 0;
+                }
+            }
+        },
 
 
         components: {
