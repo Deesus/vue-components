@@ -19,7 +19,7 @@
 
 <script>
     import { EvaIcon } from 'vue-eva-icons';
-    import AppButton from './AppButton.vue';
+    import AppButton from '../AppButton.vue';
 
 
     export default {
@@ -112,8 +112,8 @@
 
 
 <style scoped lang="scss">
-    @import "../styles/base/constants";
-    @import "../styles/mixins/mixins";
+    @import "../../styles/base/constants";
+    @import "../../styles/mixins/mixins";
 
 
     .data-table-input-cell {

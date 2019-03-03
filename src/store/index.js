@@ -14,14 +14,18 @@ Vue.use(Vuex);
 
 
 export const state = {
-    fbInstance: null,       // Firebase instance
-    data:       [],         // database list of payments
-    errored:    false,
-    loading:    true
+    fbInstance:     null,   // Firebase instance
+    data:           [],     // database list of payments
+    tableErrored:   false,
+    tableLoading:   true
 };
 
 
 export const getters = {
+    isTableLoading(state) {
+        return state.data.length > 0
+    },
+
     getSortedTableList(state) {
         return (sortByColumn, sortDirection) => {
             let tableList = [...state.data];
@@ -141,11 +145,13 @@ export const actions = {
                 snapshot.forEach( (child) => {
                     tableList.push(child.val());
                 });
-
                 commit(MUTATION.UPDATE_TABLE_DATA, tableList);
+
+                state.tableLoading = false;
             })
             .catch( (error) => {
                 // TODO: gracefully handle error
+                state.tableErrored = false;
             });
     },
 

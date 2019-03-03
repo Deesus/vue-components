@@ -1,12 +1,19 @@
 <template>
     <div id="app">
-        <data-table :headers="headers" />
+
+        <section>
+            <h1>Data Table</h1>
+
+            <data-table :headers="tableHeaders" />
+        </section>
+
+
     </div>
 </template>
 
 
 <script>
-    import DataTable from './components/DataTable';
+    import DataTable from './components/DataTable/DataTable.vue';
     import * as CONST from './app.constants';
 
 
@@ -21,7 +28,7 @@
 
         data() {
             return {
-                headers: [
+                tableHeaders: [
                     {
                         name:       CONST.DATA_TABLE.COLUMNS.NAME,
                         align:      'left',
@@ -52,5 +59,6 @@
 <style scoped>
     #app {
         margin: 30px auto;
+        max-width: 1400px;
     }
 </style>

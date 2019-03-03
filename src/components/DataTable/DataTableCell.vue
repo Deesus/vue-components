@@ -25,9 +25,9 @@
 
 
 <style scoped lang="scss">
-    @import "../styles/base/constants";
-    @import "../styles/blocks/expand-row-icon";
-    @import "../styles/mixins/mixins";
+    @import "../../styles/base/constants";
+    @import "../../styles/blocks/expand-row-icon";
+    @import "../../styles/mixins/mixins";
 
 
     .data-table-cell {

@@ -15,11 +15,12 @@
 
 <script>
     import { EvaIcon } from 'vue-eva-icons';
-    import * as CONST from '../app.constants';
+    import * as CONST from '../../app.constants';
 
 
     export default {
         name: 'DataTableHeaderCell',
+
 
         props: {
             isSortable: {
@@ -36,9 +37,11 @@
             }
         },
 
+
         components: {
             [EvaIcon.name]: EvaIcon
         },
+
 
         methods: {
             tableHeaderClick() {
@@ -48,11 +51,12 @@
             }
         },
 
+
         computed: {
             tableHeaderLabelCssClasses() {
                 return {
-                    'table-header-label': true,
-                    'table-header-label--is-sortable': this.isSortable === true,
+                    'table-header-label':                 true,
+                    'table-header-label--is-sortable':    this.isSortable === true,
                     'table-header-label--sort-ascending': (this.lastColumnSorted !== undefined) &&
                                                           (
                                                             (this.lastColumnSorted.columnName === this.columnName) &&
@@ -72,9 +76,9 @@
 
 
 <style scoped lang="scss">
-    @import "../styles/base/constants";
-    @import "../styles/blocks/_sort-icon";
-    @import "../styles/mixins/mixins";
+    @import "../../styles/base/constants";
+    @import "../../styles/blocks/sort-icon";
+    @import "../../styles/mixins/mixins";
 
 
     .data-table-header-cell {

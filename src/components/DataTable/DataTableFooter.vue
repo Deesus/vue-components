@@ -23,7 +23,7 @@
 
 
 <style scoped lang="scss">
-    @import "../styles/base/constants";
+    @import "../../styles/base/constants";
 
 
     .data-table-footer {

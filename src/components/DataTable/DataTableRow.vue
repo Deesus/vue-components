@@ -17,12 +17,12 @@
 
 
 <script>
-    import * as ACTION from '../store/types.actions';
-    import { formatDateFromISO, formatDollarAmount } from '../utils/utils';
+    import * as ACTION from '../../store/types.actions';
+    import { formatDateFromISO, formatDollarAmount } from '../../utils/utils';
     import DataTableCell from './DataTableCell.vue';
     import DataTableInputCell from './DataTableInputCell.vue';
     import { EvaIcon } from 'vue-eva-icons';
-    import "../styles/app.scss";
+    import "../../styles/app.scss";
 
 
     export default {
@@ -99,7 +99,7 @@
 
 
 <style scoped lang="scss">
-    @import "../styles/base/constants";
+    @import "../../styles/base/constants";
 
 
     .data-table-row {

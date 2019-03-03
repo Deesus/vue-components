@@ -18,7 +18,13 @@
 
 
             <tbody>
-                <data-table-row v-for="entry in getSortedTableList(sortByColumn, sortDirection)" :key="entry.ID" :entry="entry" />
+                <template v-if="tableLoading">
+                    <data-table-row-no-data :headers="headers" />
+                </template>
+
+                <template v-else>
+                    <data-table-row v-for="entry in sortedTableList(sortByColumn, sortDirection)" :key="entry.ID" :entry="entry" />
+                </template>
             </tbody>
 
 
@@ -29,12 +35,13 @@
 
 
 <script>
-    import * as CONST from '../app.constants';
+    import * as CONST from '../../app.constants';
     import { EvaIcon } from 'vue-eva-icons';
     import DataTableRow from './DataTableRow.vue';
+    import DataTableRowNoData from './DataTableRowNoData.vue'
     import DataTableHeaderCell from './DataTableHeaderCell.vue';
     import DataTableFooter from './DataTableFooter.vue';
-    import { mapGetters, mapActions } from 'vuex';
+    import { mapState, mapGetters, mapActions } from 'vuex';
 
 
     export default {
@@ -56,14 +63,13 @@
             DataTableRow,
             DataTableHeaderCell,
             DataTableFooter,
+            DataTableRowNoData,
             [EvaIcon.name]: EvaIcon
         },
 
 
         data() {
             return {
-                errored: false,
-                loading: true,
                 lastColumnSortedName: '',
                 sortDirection: CONST.DATA_TABLE.SORT_NONE,
                 sortByColumn: '',
@@ -136,9 +142,13 @@
 
 
         computed: {
-            ...mapGetters([
-                'getSortedTableList'
+            ...mapState([
+                'tableLoading'
             ]),
+
+            ...mapGetters({
+                sortedTableList: 'getSortedTableList'
+            }),
 
             lastColumnSorted() {
                 return {
@@ -162,11 +172,10 @@
 
 
 <style scoped lang="scss">
-    @import "../styles/base/constants";
+    @import "../../styles/base/constants";
 
 
     .data-table {
-        max-width: 1200px;
         width: 100%;
         border-collapse: collapse;
         border-spacing: 0;
@@ -177,6 +186,11 @@
         // TODO: possibly need a separate component for 'header-row' and 'table-body-row'?
         &__header-row {
             background-color: $table-header-bg-color;
+        }
+
+        thead {
+            border-left: 1px solid crimson;
+            border-right: 1px solid crimson;
         }
     }
 </style>
