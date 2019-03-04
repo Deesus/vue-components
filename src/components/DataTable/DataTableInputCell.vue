@@ -10,8 +10,8 @@
             <app-button v-if="!isBeingEdited" color="blue" @click.native.stop="handleEditButtonClick">
                 Edit
             </app-button>
-            <app-button v-if="isBeingEdited" color="gray" @click.native.stop="handleCancelButtonClick">Cancel</app-button>
-            <app-button v-if="isBeingEdited" color="blue" @click.native.stop="handleSaveButtonClick">Save</app-button>
+            <app-button v-if="isBeingEdited" color="gray" @click.stop="handleCancelButtonClick">Cancel</app-button>
+            <app-button v-if="isBeingEdited" color="blue" @click.stop="handleSaveButtonClick">Save</app-button>
         </div>
     </td>
 </template>

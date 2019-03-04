@@ -8,6 +8,8 @@
 
                     <data-table-header-cell v-for="(header, index) in headers"
                                             :key="index"
+                                            :align="header.align"
+                                            :width="header.width"
                                             :column-name="header.name"
                                             :is-sortable="header.isSortable"
                                             :last-column-sorted="lastColumnSorted"
@@ -143,7 +145,8 @@
 
         computed: {
             ...mapState([
-                'tableLoading'
+                'tableLoading',
+                'fbInstance'
             ]),
 
             ...mapGetters({
@@ -161,11 +164,15 @@
 
         created() {
             // ---------- get data: ----------
-            // establish Firebase connection then get initial data:
-            this.instantiateFirebase()
-                .then(() => {
-                    this.getInitialData();
-                });
+            // since Firebase connects to a websocket, and a user can only have 1 connection to FB,
+            // we should only attempt connection if one hasn't already been established:
+            if (this.fbInstance === null) {
+                // establish Firebase connection then get initial data:
+                this.instantiateFirebase()
+                    .then(() => {
+                        this.getInitialData();
+                    });
+            }
         }
     }
 </script>
@@ -186,11 +193,6 @@
         // TODO: possibly need a separate component for 'header-row' and 'table-body-row'?
         &__header-row {
             background-color: $table-header-bg-color;
-        }
-
-        thead {
-            border-left: 1px solid crimson;
-            border-right: 1px solid crimson;
         }
     }
 </style>

@@ -1,7 +1,7 @@
 <template>
-    <th class="data-table-header-cell">
+    <th class="data-table-header-cell" :style="stylesForTableHeaderCell">
 
-        <span :class="tableHeaderLabelCssClasses" @click.stop="tableHeaderClick">
+        <span :class="cssClassesForTableHeaderLabel" @click.stop="tableHeaderClick">
             <span>{{ columnName }}</span>
             <eva-icon class="sort-icon"
                       fill="#353535"
@@ -34,6 +34,16 @@
 
             lastColumnSorted: {
                 type: Object
+            },
+
+            align: {
+                type: String,
+                required: false
+            },
+
+            width: {
+                type: Number,
+                required: false
             }
         },
 
@@ -53,22 +63,29 @@
 
 
         computed: {
-            tableHeaderLabelCssClasses() {
+            stylesForTableHeaderCell() {
                 return {
-                    'table-header-label':                 true,
-                    'table-header-label--is-sortable':    this.isSortable === true,
-                    'table-header-label--sort-ascending': (this.lastColumnSorted !== undefined) &&
-                                                          (
-                                                            (this.lastColumnSorted.columnName === this.columnName) &&
-                                                            (this.lastColumnSorted.direction === CONST.DATA_TABLE.SORT_ASCENDING)
-                                                          ),
+                    'text-align': this.align,
+                    'width': `${this.width}px`
+                };
+            },
 
-                    'table-header-label--sort-descending': (this.lastColumnSorted !== undefined) &&
-                                                           (
-                                                             (this.lastColumnSorted.columnName === this.columnName) &&
-                                                             (this.lastColumnSorted.direction === CONST.DATA_TABLE.SORT_DESCENDING)
-                                                           )
-                }
+            cssClassesForTableHeaderLabel() {
+                return {
+                    'data-table-header-label':              true,
+                    'data-table-header-label--is-sortable': this.isSortable === true,
+                    'data-table-header-label--sort-asc':    (this.lastColumnSorted !== undefined) &&
+                                                            (
+                                                                (this.lastColumnSorted.columnName === this.columnName) &&
+                                                                (this.lastColumnSorted.direction === CONST.DATA_TABLE.SORT_ASCENDING)
+                                                            ),
+
+                    'data-table-header-label--sort-desc':   (this.lastColumnSorted !== undefined) &&
+                                                            (
+                                                                (this.lastColumnSorted.columnName === this.columnName) &&
+                                                                (this.lastColumnSorted.direction === CONST.DATA_TABLE.SORT_DESCENDING)
+                                                            )
+                    };
             }
         }
     }
@@ -89,7 +106,7 @@
         text-align: left;
     }
 
-    .table-header-label {
+    .data-table-header-label {
         display: inline-flex;
         flex-direction: row;
         align-items: center;
@@ -101,18 +118,19 @@
             }
         }
 
+        // ---------- modifiers: ----------
         &--is-sortable {
             cursor: pointer;
         }
 
-        &--sort-ascending {
+        &--sort-asc {
             .sort-icon,
             &:hover .sort-icon {
                 opacity: 1;
             }
         }
 
-        &--sort-descending {
+        &--sort-desc {
             .sort-icon,
             &:hover .sort-icon {
                 opacity: 1;

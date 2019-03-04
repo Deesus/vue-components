@@ -1,5 +1,5 @@
 <template>
-    <button :class="cssClassesForButton" type="button"><slot /></button>
+    <button :class="cssClassesForButton" @click="handleButtonClick" type="button"><slot /></button>
 </template>
 
 
@@ -20,7 +20,25 @@
         },
 
 
+        methods: {
+            /**
+             * Button click handler: simply emits the `event` to parent.
+             * Using `$emit` prevents us from having to use the `.native` modifier on component instances.
+             *
+             * @param event
+             */
+            handleButtonClick(event) {
+                this.$emit('click', event);
+            }
+        },
+
+
         computed: {
+            /**
+             * Computes CSS classes for button, given the props passed to the component.
+             *
+             * @returns {Object}
+             */
             cssClassesForButton() {
                 return {
                     'app-button':        true,
@@ -49,6 +67,7 @@
             margin-left: 8px;
         }
 
+        // ---------- modifiers: ----------
         &--blue {
             @include appButtonColor(#58a7ff);
         }

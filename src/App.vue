@@ -1,10 +1,16 @@
 <template>
     <div id="app">
 
+
         <section>
             <h1>Data Table</h1>
-
             <data-table :headers="tableHeaders" />
+        </section>
+
+
+        <section>
+            <h1>Button</h1>
+            <app-button color="blue">Click Me</app-button>
         </section>
 
 
@@ -14,6 +20,7 @@
 
 <script>
     import DataTable from './components/DataTable/DataTable.vue';
+    import AppButton from './components/AppButton.vue';
     import * as CONST from './app.constants';
 
 
@@ -22,7 +29,8 @@
 
 
         components: {
-            DataTable
+            DataTable,
+            AppButton
         },
 
 
@@ -36,17 +44,17 @@
                     },
                     {
                         name:       CONST.DATA_TABLE.COLUMNS.DESCRIPTION,
-                        align:      'left',
                         isSortable: false,
                     },
                     {
                         name:       CONST.DATA_TABLE.COLUMNS.AMOUNT,
                         align:      'left',
+                        width:      200,
                         isSortable: true,
                     },
                     {
                         name:       CONST.DATA_TABLE.COLUMNS.DATE,
-                        align:      'left',
+                        align:      'right',
                         isSortable: true,
                     }
                 ]
