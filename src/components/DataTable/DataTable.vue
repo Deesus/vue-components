@@ -72,7 +72,7 @@
 
         data() {
             return {
-                lastColumnSortedName: '',
+                currentSortColumn: '',
                 sortDirection: CONST.DATA_TABLE.SORT_NONE,
                 sortByColumn: '',
                 DATA_TABLE_COLUMNS: CONST.DATA_TABLE.COLUMNS,
@@ -90,7 +90,7 @@
             handleSortByColumnClick(columnName) {
 
                 // if clicked column is same as previously clicked column, then toggle sort direction:
-                if (this.lastColumnSortedName === columnName) {
+                if (this.currentSortColumn === columnName) {
                     this.sortDirection = this.toggleSortArrowDirection();
                 }
                 // if the clicked column is different than previous one, always ensure it is initially sorted ascending:
@@ -150,12 +150,12 @@
             ]),
 
             ...mapGetters({
-                sortedTableList: 'getSortedTableList'
+                sortedTableData: 'getSortedTableList'
             }),
 
             lastColumnSorted() {
                 return {
-                    columnName: this.lastColumnSortedName,
+                    columnName: this.currentSortColumn,
                     direction:  this.sortDirection
                 };
             }

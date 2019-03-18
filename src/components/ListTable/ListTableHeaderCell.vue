@@ -32,14 +32,6 @@
                 required: false
             },
 
-            lastColumnSortedName: {
-                type: String
-            },
-
-            sortDirection: {
-                type: String
-            },
-
             align: {
                 type: String,
                 required: false
@@ -48,6 +40,14 @@
             width: {
                 type: Number,
                 required: false
+            },
+
+            currentSortColumn: {
+                type: String
+            },
+
+            sortDirection: {
+                type: String
             }
         },
 
@@ -60,6 +60,7 @@
         methods: {
             tableHeaderClick() {
                 if (this.isSortable === true) {
+                    console.log('table header COMPONENT clicked');
                     this.$emit('eventTableHeaderClick', this.headerText);
                 }
             }
@@ -78,10 +79,10 @@
                 return {
                     'list-table-header-label':              true,
                     'list-table-header-label--is-sortable': this.isSortable === true,
-                    'list-table-header-label--sort-asc':    (this.lastColumnSortedName === this.headerText) &&
+                    'list-table-header-label--sort-asc':    (this.currentSortColumn === this.headerText) &&
                                                             (this.sortDirection === CONST.DATA_TABLE.SORT_ASCENDING),
 
-                    'list-table-header-label--sort-desc':   (this.lastColumnSortedName === this.headerText) &&
+                    'list-table-header-label--sort-desc':   (this.currentSortColumn === this.headerText) &&
                                                             (this.sortDirection === CONST.DATA_TABLE.SORT_DESCENDING)
                     };
             }

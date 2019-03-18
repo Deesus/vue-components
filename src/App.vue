@@ -6,14 +6,26 @@
             <app-button color="blue">Click Me</app-button>
         </section>
 
-        <!--<section>-->
-            <!--<h1>Data Table</h1>-->
-            <!--<data-table :headers="tableHeaders" />-->
-        <!--</section>-->
 
         <section>
             <h1>List Table</h1>
-            <list-table :headers="tableHeaders" :items="data" />
+
+            <list-table :headers="tableHeaders" :items="sortedTableData">
+                <template scope="item">
+                    <td>
+                        {{ item.Name }}
+                    </td>
+                    <td>
+                        {{ item.Description }}
+                    </td>
+                    <td>
+                        {{ item.Amount }}
+                    </td>
+                    <td>
+                        {{ item.Date }}
+                    </td>
+                </template>
+            </list-table>
         </section>
 
     </div>
@@ -83,7 +95,67 @@
                 'tableLoading',
                 'fbInstance',
                 'data'
-            ])
+            ]),
+
+            sortedTableData() {
+                let tableList = [...this.data];
+
+                // ----- sort the data by column name: -----
+                switch (this.sortByColumn) {
+
+                    case CONST.DATA_TABLE.COLUMNS.NAME:
+                        tableList = tableList
+                            .sort( (x, y) => {
+                                const name1 = x[CONST.DATA_TABLE.COLUMNS.NAME].toUpperCase();
+                                const name2 = y[CONST.DATA_TABLE.COLUMNS.NAME].toUpperCase();
+
+                                if (name1 < name2) {
+                                    return -1;
+                                }
+                                else {
+                                    return 1;
+                                }
+                            });
+                        break;
+
+                    case CONST.DATA_TABLE.COLUMNS.AMOUNT:
+                        tableList = tableList
+                            .sort((x, y) => {
+                                const amount1 = parseFloat(x[CONST.DATA_TABLE.COLUMNS.AMOUNT]);
+                                const amount2 = parseFloat(y[CONST.DATA_TABLE.COLUMNS.AMOUNT]);
+
+                                return amount1 - amount2;
+                            });
+                        break;
+
+                    case CONST.DATA_TABLE.COLUMNS.DATE:
+                        // because the date values are stored in ISO format, we can do a simple string sort:
+                        tableList = tableList
+                            .sort( (x, y) => {
+                                const date1 = x[CONST.DATA_TABLE.COLUMNS.DATE].toUpperCase();
+                                const date2 = y[CONST.DATA_TABLE.COLUMNS.DATE].toUpperCase();
+
+                                if (date1 < date2) {
+                                    return -1;
+                                }
+                                else {
+                                    return 1;
+                                }
+                            });
+                        break;
+
+                    default:
+                        tableList = this.data;
+                        break;
+                }
+
+                // ----- reverse the list if sorting in 'descending' direction: -----
+                if (this.sortDirection === CONST.DATA_TABLE.SORT_DESCENDING) {
+                    tableList = tableList.reverse();
+                }
+
+                return tableList;
+            }
         },
 
 
