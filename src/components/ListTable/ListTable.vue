@@ -4,14 +4,14 @@
             <!-- ---------- table header: ---------- -->
             <thead>
                 <tr class="list-table__header-row">
-                    <list-table-header-cell v-for="(header, index) in headers"
+                    <list-table-header-cell v-for="(column, index) in columns"
                                             :key="index"
-                                            :width="header.width"
-                                            :column-name="header.columnName"
-                                            :header-text="header.headerText"
-                                            :is-sortable="header.isSortable"
-                                            :sort-function="header.sortFunction"
-                                            :current-sort-column="currentSortColumn"
+                                            :width="column.width"
+                                            :column-name="column.name"
+                                            :header-text="column.headerText"
+                                            :is-sortable="column.isSortable"
+                                            :sort-function="column.sortFunction"
+                                            :current-sort-column="currentSortedColumn"
                                             :sort-direction="sortDirection"
                                             @eventTableHeaderClick="handleSortByColumnClick"
                     />
@@ -30,7 +30,7 @@
             <!-- ---------- no data: ---------- -->
             <tbody v-else>
                 <tr  class="list-table__no-data-row">
-                    <td :colspan="headers.length + 1">
+                    <td :colspan="columns.length + 1">
                         No Data
                     </td>
                 </tr>
@@ -50,7 +50,7 @@
 
 
         props: {
-            headers: {
+            columns: {
                 type: Array,
                 required: true,
                 validator: (arr) => {
@@ -71,8 +71,8 @@
 
         data() {
             return {
-                currentSortColumn: '',
-                currentSortFunction: null,
+                currentSortedColumn: '',
+                sortFunctionToApply: null,
                 sortDirection: this.SORT_NONE,
 
                 SORT_ASCENDING: 'ASC',
@@ -85,7 +85,7 @@
         methods: {
             handleSortByColumnClick({ columnName, sortFunction }) {
                 // if clicked column is same as previously clicked column, then toggle sort direction:
-                if (this.currentSortColumn === columnName) {
+                if (this.currentSortedColumn === columnName) {
                     this.sortDirection = this.toggleSortArrowDirection();
                 }
                 // if the clicked column is different than previous one, always ensure it is initially sorted ascending:
@@ -96,14 +96,14 @@
                 // after asc/desc sort direction is determined, set the 'sort the column':
                 // if the sort direction is 'NONE', then don't set the `sortFunction` either, otherwise sort by the column name:
                 if (this.sortDirection === this.SORT_NONE) {
-                    this.currentSortFunction = null;
+                    this.sortFunctionToApply = null;
                 }
                 else {
-                    this.currentSortFunction = sortFunction;
+                    this.sortFunctionToApply = sortFunction;
                 }
 
                 // the sorted column now becomes the 'last sorted column':
-                this.currentSortColumn = columnName;
+                this.currentSortedColumn = columnName;
             },
 
             toggleSortArrowDirection() {
@@ -135,18 +135,18 @@
         computed: {
             sortedItems() {
                 // initial table render doesn't have a sorted column yet, so return the list early:
-                if (this.currentSortColumn === '') {
+                if (this.currentSortedColumn === '') {
                     return this.items;
                 }
 
                 let tableList = [...this.items];
 
                 // default sort function (simple string sort):
-                if (this.currentSortFunction === null) {
+                if (this.sortFunctionToApply === null) {
                     tableList = tableList
                         .sort( (row1, row2) => {
-                            const val1 = row1[this.currentSortColumn].toUpperCase();
-                            const val2 = row2[this.currentSortColumn].toUpperCase();
+                            const val1 = row1[this.currentSortedColumn].toUpperCase();
+                            const val2 = row2[this.currentSortedColumn].toUpperCase();
 
                             if (val1 < val2) {
                                 return -1;
@@ -158,7 +158,7 @@
                 }
                 // apply custom sort function if supplied:
                 else {
-                    tableList = tableList.sort(this.currentSortFunction);
+                    tableList = tableList.sort(this.sortFunctionToApply);
                 }
 
                 // reverse the list if sorting in 'descending' direction:

@@ -10,7 +10,7 @@
         <section>
             <h1>List Table</h1>
 
-            <list-table :headers="tableHeaders" :items="data">
+            <list-table :columns="columns" :items="data">
                 <template scope="item">
                     <td>
                         {{ item.Name }}
@@ -58,31 +58,28 @@
 
         data() {
             return {
-                tableHeaders: [
+                columns: [
                     {
-                        columnName: 'Name',
+                        name:       'Name',
                         headerText: 'Name',
-                        align:      'left',
                         isSortable: true,
                     },
                     {
-                        columnName: 'Description',
-                        headerText: 'Description',
+                        name:       'Description',
+                        headerText: 'User Description',
                         isSortable: false,
                     },
                     {
-                        columnName:     'Amount',
-                        headerText:     'Amount ($)',
-                        align:          'left',
-                        width:          200,
-                        isSortable:     true,
-                        sortFunction:   this.sortByAmount,
+                        name:         'Amount',
+                        headerText:   'Amount ($)',
+                        width:        200,
+                        isSortable:   true,
+                        sortFunction: this.sortByAmount,
                     },
                     {
-                        columnName: 'Date',
-                        headerText: 'Date',
-                        align:      'right',
-                        isSortable: true,
+                        name:         'Date',
+                        headerText:   'Date',
+                        isSortable:   true,
                         sortFunction: this.sortByDate
                     }
                 ]
@@ -142,12 +139,13 @@
 </script>
 
 
-<style scoped>
+<style scoped lang="scss">
     #app {
         margin: 30px auto;
         max-width: 1400px;
     }
 
+    /* TODO: convert to vue component: */
     .badge {
         display: inline-block;
         padding: 4px 6px;
