@@ -5,7 +5,8 @@
     padding: $table-padding;
     min-height: $table-row-height;
     height: $table-row-height;
-    border-top: $table-border;
+    border-bottom: $table-border;
+    vertical-align: middle;
 
     &:first-of-type {
         padding-left: 16px;

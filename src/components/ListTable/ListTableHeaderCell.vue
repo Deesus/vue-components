@@ -15,7 +15,6 @@
 
 <script>
     import { EvaIcon } from 'vue-eva-icons';
-    import * as CONST from '../../app.constants';
 
 
     export default {
@@ -23,6 +22,7 @@
 
 
         props: {
+            // TODO: replace all these props with object?
             isSortable: {
                 type: Boolean
             },
@@ -32,14 +32,13 @@
                 required: false
             },
 
-            align: {
-                type: String,
-                required: false
-            },
-
             width: {
                 type: Number,
                 required: false
+            },
+
+            sortFunction: {
+                type: String | Function
             },
 
             currentSortColumn: {
@@ -47,6 +46,10 @@
             },
 
             sortDirection: {
+                type: String
+            },
+
+            columnName: {
                 type: String
             }
         },
@@ -57,11 +60,21 @@
         },
 
 
+        // TODO: use dependency injection so that we can reuse the constants from parent component:
+        data() {
+            return {
+                SORT_ASCENDING: 'ASC',
+                SORT_DESCENDING: 'DESC',
+                SORT_NONE: 'NONE'
+            };
+        },
+
+
         methods: {
             tableHeaderClick() {
                 if (this.isSortable === true) {
-                    console.log('table header COMPONENT clicked');
-                    this.$emit('eventTableHeaderClick', this.headerText);
+                    this.$emit('eventTableHeaderClick',
+                               { columnName: this.columnName, sortFunction: this.sortFunction });
                 }
             }
         },
@@ -70,7 +83,6 @@
         computed: {
             stylesForTableHeaderCell() {
                 return {
-                    'text-align': this.align,
                     'width': `${this.width}px`
                 };
             },
@@ -79,11 +91,14 @@
                 return {
                     'list-table-header-label':              true,
                     'list-table-header-label--is-sortable': this.isSortable === true,
-                    'list-table-header-label--sort-asc':    (this.currentSortColumn === this.headerText) &&
-                                                            (this.sortDirection === CONST.DATA_TABLE.SORT_ASCENDING),
 
-                    'list-table-header-label--sort-desc':   (this.currentSortColumn === this.headerText) &&
-                                                            (this.sortDirection === CONST.DATA_TABLE.SORT_DESCENDING)
+                    // only apply class if the header name matches the clicked/sorted header name:
+                    'list-table-header-label--sort-asc':    (this.currentSortColumn === this.columnName) &&
+                                                            (this.sortDirection === this.SORT_ASCENDING),
+
+                    // only apply class if the header name matches the clicked/sorted header name:
+                    'list-table-header-label--sort-desc':   (this.currentSortColumn === this.columnName) &&
+                                                            (this.sortDirection === this.SORT_DESCENDING)
                     };
             }
         }
@@ -103,6 +118,7 @@
         color: $font-color-bold;
         font-weight: $font-weight-bold;
         text-align: left;
+        border-top: $table-border;
     }
 
     .list-table-header-label {

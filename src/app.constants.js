@@ -1,17 +1,3 @@
-export const DATA_TABLE = Object.freeze({
-    // names of columns (the same the database key for each entry):
-    COLUMNS: {
-        NAME:           'Name',
-        DESCRIPTION:    'Description',
-        AMOUNT:         'Amount',
-        DATE:           'Date'
-    },
-    SORT_NONE:       'NONE',
-    SORT_ASCENDING:     'ASC',
-    SORT_DESCENDING:    'DESC'
-});
-
-
 export const FIREBASE = Object.freeze({
     LIMIT_RESULTS_TO_DEFAULT_NUMBER: 25,
     // see <https://firebase.google.com/docs/reference/js/firebase.database.Reference> about Firebase ref;

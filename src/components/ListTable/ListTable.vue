@@ -1,14 +1,16 @@
 <template>
         <table class="list-table">
 
+            <!-- ---------- table header: ---------- -->
             <thead>
                 <tr class="list-table__header-row">
                     <list-table-header-cell v-for="(header, index) in headers"
                                             :key="index"
-                                            :align="header.align"
                                             :width="header.width"
+                                            :column-name="header.columnName"
                                             :header-text="header.headerText"
                                             :is-sortable="header.isSortable"
+                                            :sort-function="header.sortFunction"
                                             :current-sort-column="currentSortColumn"
                                             :sort-direction="sortDirection"
                                             @eventTableHeaderClick="handleSortByColumnClick"
@@ -16,30 +18,31 @@
                 </tr>
             </thead>
 
-            <tbody>
-                <tr v-for="(item, rowIndex) in items" :key="`tr-${rowIndex}`">
+            <!-- ---------- table content: ---------- -->
+            <tbody v-if="items.length > 0">
+                <tr v-for="(item, rowIndex) in sortedItems"
+                    :key="`tr-${rowIndex}`"
+                >
                     <slot v-bind="item" />
                 </tr>
-
-                <!-- TODO: If no data: -->
-                <!--<tr class="list-table__no-data-row">-->
-                    <!--<td :colspan="headers.length + 1">-->
-                        <!--No Data-->
-                    <!--</td>-->
-                <!--</tr>-->
             </tbody>
 
+            <!-- ---------- no data: ---------- -->
+            <tbody v-else>
+                <tr  class="list-table__no-data-row">
+                    <td :colspan="headers.length + 1">
+                        No Data
+                    </td>
+                </tr>
+            </tbody>
 
-            <!-- TODO: create separate named slot for table footer(s): -->
-            <list-table-footer />
+            <!-- TODO: create separate named slot for table footer(s) -->
         </table>
 </template>
 
 
 <script>
-    import * as CONST from '../../app.constants';
     import ListTableHeaderCell from './ListTableHeaderCell.vue';
-    import ListTableFooter from './ListTableFooter.vue';
 
 
     export default {
@@ -62,39 +65,41 @@
 
 
         components: {
-            ListTableHeaderCell,
-            ListTableFooter
+            ListTableHeaderCell
         },
 
 
         data() {
             return {
                 currentSortColumn: '',
-                sortDirection: CONST.DATA_TABLE.SORT_NONE,
-                sortByColumn: '',
-                DATA_TABLE_COLUMNS: CONST.DATA_TABLE.COLUMNS,
+                currentSortFunction: null,
+                sortDirection: this.SORT_NONE,
+
+                SORT_ASCENDING: 'ASC',
+                SORT_DESCENDING: 'DESC',
+                SORT_NONE: 'NONE'
             };
         },
 
 
         methods: {
-            handleSortByColumnClick(columnName) {
+            handleSortByColumnClick({ columnName, sortFunction }) {
                 // if clicked column is same as previously clicked column, then toggle sort direction:
                 if (this.currentSortColumn === columnName) {
                     this.sortDirection = this.toggleSortArrowDirection();
                 }
                 // if the clicked column is different than previous one, always ensure it is initially sorted ascending:
                 else {
-                    this.sortDirection = CONST.DATA_TABLE.SORT_ASCENDING;
+                    this.sortDirection = this.SORT_ASCENDING;
                 }
 
                 // after asc/desc sort direction is determined, set the 'sort the column':
-                // if the sort direction is 'NONE', then don't set the `sortByColumn` either, otherwise sort by the column name:
-                if (this.sortDirection === CONST.DATA_TABLE.SORT_NONE) {
-                    this.sortByColumn = '';
+                // if the sort direction is 'NONE', then don't set the `sortFunction` either, otherwise sort by the column name:
+                if (this.sortDirection === this.SORT_NONE) {
+                    this.currentSortFunction = null;
                 }
                 else {
-                    this.sortByColumn = columnName;
+                    this.currentSortFunction = sortFunction;
                 }
 
                 // the sorted column now becomes the 'last sorted column':
@@ -105,20 +110,20 @@
                 let newArrowDirection;
 
                 switch (this.sortDirection) {
-                    case CONST.DATA_TABLE.SORT_NONE:
-                        newArrowDirection = CONST.DATA_TABLE.SORT_ASCENDING;
+                    case this.SORT_NONE:
+                        newArrowDirection = this.SORT_ASCENDING;
                         break;
 
-                    case CONST.DATA_TABLE.SORT_ASCENDING:
-                        newArrowDirection = CONST.DATA_TABLE.SORT_DESCENDING;
+                    case this.SORT_ASCENDING:
+                        newArrowDirection = this.SORT_DESCENDING;
                         break;
 
-                    case CONST.DATA_TABLE.SORT_DESCENDING:
-                        newArrowDirection = CONST.DATA_TABLE.SORT_NONE;
+                    case this.SORT_DESCENDING:
+                        newArrowDirection = this.SORT_NONE;
                         break;
 
                     default:
-                        newArrowDirection = CONST.DATA_TABLE.SORT_ASCENDING;
+                        newArrowDirection = this.SORT_ASCENDING;
                         break;
                 }
 
@@ -128,7 +133,41 @@
 
 
         computed: {
+            sortedItems() {
+                // initial table render doesn't have a sorted column yet, so return the list early:
+                if (this.currentSortColumn === '') {
+                    return this.items;
+                }
 
+                let tableList = [...this.items];
+
+                // default sort function (simple string sort):
+                if (this.currentSortFunction === null) {
+                    tableList = tableList
+                        .sort( (row1, row2) => {
+                            const val1 = row1[this.currentSortColumn].toUpperCase();
+                            const val2 = row2[this.currentSortColumn].toUpperCase();
+
+                            if (val1 < val2) {
+                                return -1;
+                            }
+                            else {
+                                return 1;
+                            }
+                        });
+                }
+                // apply custom sort function if supplied:
+                else {
+                    tableList = tableList.sort(this.currentSortFunction);
+                }
+
+                // reverse the list if sorting in 'descending' direction:
+                if (this.sortDirection === this.SORT_DESCENDING) {
+                    tableList = tableList.reverse();
+                }
+
+                return tableList;
+            }
         }
     }
 </script>
@@ -151,10 +190,12 @@
             @include tableCellGeometry();
 
             border-top: $table-border;
-            vertical-align: top;
         }
 
-        // TODO: possibly need a separate component for 'header-row' and 'table-body-row'?
+        tbody tr:not([class*="no-data-row"]):hover {
+            background: #f9f9f9;
+        }
+
         &__header-row {
             background-color: $table-header-bg-color;
         }
@@ -163,7 +204,6 @@
             td {
                 @include tableCellGeometry();
 
-                height: 180px;
                 text-align: center;
             }
         }

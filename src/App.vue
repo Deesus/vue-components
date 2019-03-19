@@ -10,7 +10,7 @@
         <section>
             <h1>List Table</h1>
 
-            <list-table :headers="tableHeaders" :items="sortedTableData">
+            <list-table :headers="tableHeaders" :items="data">
                 <template scope="item">
                     <td>
                         {{ item.Name }}
@@ -22,7 +22,8 @@
                         {{ item.Amount }}
                     </td>
                     <td>
-                        {{ item.Date }}
+                        {{ item.Date | formatISOTimeToMonthDayYearHourMinutesMeridiem }}
+                        <span class="badge" v-if="isUpcomingDueDate(item.Date)">Upcoming</span>
                     </td>
                 </template>
             </list-table>
@@ -33,11 +34,11 @@
 
 
 <script>
-    import * as CONST from './app.constants';
-    import DataTable from './components/DataTable/DataTable.vue';
     import AppButton from './components/AppButton.vue';
     import ListTable from './components/ListTable/ListTable.vue';
     import { mapState, mapGetters, mapActions } from 'vuex';
+    import moment from 'moment';
+    import { formatISOTimeToMonthDayYearHourMinutesMeridiem } from './utils/filters';
 
 
     export default {
@@ -46,8 +47,12 @@
 
         components: {
             AppButton,
-            DataTable,
             ListTable
+        },
+
+
+        filters: {
+            formatISOTimeToMonthDayYearHourMinutesMeridiem,
         },
 
 
@@ -55,28 +60,30 @@
             return {
                 tableHeaders: [
                     {
+                        columnName: 'Name',
                         headerText: 'Name',
                         align:      'left',
                         isSortable: true,
-                        fieldName:  CONST.DATA_TABLE.COLUMNS.NAME
                     },
                     {
+                        columnName: 'Description',
                         headerText: 'Description',
                         isSortable: false,
-                        fieldName:  CONST.DATA_TABLE.COLUMNS.DESCRIPTION
                     },
                     {
-                        headerText: 'Amount ($)',
-                        align:      'left',
-                        width:      200,
-                        isSortable: true,
-                        fieldName:  CONST.DATA_TABLE.COLUMNS.AMOUNT
+                        columnName:     'Amount',
+                        headerText:     'Amount ($)',
+                        align:          'left',
+                        width:          200,
+                        isSortable:     true,
+                        sortFunction:   this.sortByAmount,
                     },
                     {
+                        columnName: 'Date',
                         headerText: 'Date',
                         align:      'right',
                         isSortable: true,
-                        fieldName:  CONST.DATA_TABLE.COLUMNS.DATE
+                        sortFunction: this.sortByDate
                     }
                 ]
             }
@@ -88,74 +95,34 @@
                 'getInitialData',
                 'instantiateFirebase'
             ]),
+
+            sortByAmount(row1, row2) {
+                const val1 = parseFloat(row1['Amount']);
+                const val2 = parseFloat(row2['Amount']);
+
+                return val1 - val2;
+            },
+
+            sortByDate(row1, row2) {
+                const val1 = moment(row1['Date']);
+                const val2 = moment(row2['Date']);
+
+                return val1 - val2;
+            },
+
+            isUpcomingDueDate(date) {
+                const today = moment();
+                return moment(date).isAfter(today);
+            }
         },
+
 
         computed: {
             ...mapState([
                 'tableLoading',
                 'fbInstance',
                 'data'
-            ]),
-
-            sortedTableData() {
-                let tableList = [...this.data];
-
-                // ----- sort the data by column name: -----
-                switch (this.sortByColumn) {
-
-                    case CONST.DATA_TABLE.COLUMNS.NAME:
-                        tableList = tableList
-                            .sort( (x, y) => {
-                                const name1 = x[CONST.DATA_TABLE.COLUMNS.NAME].toUpperCase();
-                                const name2 = y[CONST.DATA_TABLE.COLUMNS.NAME].toUpperCase();
-
-                                if (name1 < name2) {
-                                    return -1;
-                                }
-                                else {
-                                    return 1;
-                                }
-                            });
-                        break;
-
-                    case CONST.DATA_TABLE.COLUMNS.AMOUNT:
-                        tableList = tableList
-                            .sort((x, y) => {
-                                const amount1 = parseFloat(x[CONST.DATA_TABLE.COLUMNS.AMOUNT]);
-                                const amount2 = parseFloat(y[CONST.DATA_TABLE.COLUMNS.AMOUNT]);
-
-                                return amount1 - amount2;
-                            });
-                        break;
-
-                    case CONST.DATA_TABLE.COLUMNS.DATE:
-                        // because the date values are stored in ISO format, we can do a simple string sort:
-                        tableList = tableList
-                            .sort( (x, y) => {
-                                const date1 = x[CONST.DATA_TABLE.COLUMNS.DATE].toUpperCase();
-                                const date2 = y[CONST.DATA_TABLE.COLUMNS.DATE].toUpperCase();
-
-                                if (date1 < date2) {
-                                    return -1;
-                                }
-                                else {
-                                    return 1;
-                                }
-                            });
-                        break;
-
-                    default:
-                        tableList = this.data;
-                        break;
-                }
-
-                // ----- reverse the list if sorting in 'descending' direction: -----
-                if (this.sortDirection === CONST.DATA_TABLE.SORT_DESCENDING) {
-                    tableList = tableList.reverse();
-                }
-
-                return tableList;
-            }
+            ])
         },
 
 
@@ -179,5 +146,13 @@
     #app {
         margin: 30px auto;
         max-width: 1400px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 6px;
+        border-radius: 4px;
+        color: white;
+        background: #ffbd40;
     }
 </style>
